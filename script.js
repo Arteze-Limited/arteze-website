@@ -56,6 +56,7 @@ var CONSENT_KEY = "arteze-cookie-consent";
     var consent = getConsent();
     if (consent === "accepted") loadAnalytics();
     if (!banner) return;
+    if (!ANALYTICS.ga4Id && !ANALYTICS.plausibleDomain) return;
     if (!consent) banner.hidden = false;
     banner.addEventListener("click", function (e) {
       var btn = e.target.closest("[data-consent]");
