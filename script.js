@@ -132,7 +132,7 @@ var FORM_EMAIL = "hello@arteze.co.uk";
 
   function initMotion() {
     if (!reduceMotion) return;
-    doc.querySelectorAll("svg.anim").forEach(function (svg) { if (svg.pauseAnimations) { svg.pauseAnimations(); svg.setCurrentTime && svg.setCurrentTime(1.2); } });
+    doc.querySelectorAll("svg.anim").forEach(function (svg) { if (svg.pauseAnimations) { svg.pauseAnimations(); svg.setCurrentTime && svg.setCurrentTime(parseFloat(svg.getAttribute("data-still") || "1.2")); } });
   }
 
   doc.addEventListener("DOMContentLoaded", function () {
