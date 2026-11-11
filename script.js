@@ -1,143 +1,129 @@
-/* =========================================================
-   ARTEZE — script.js
-   1. Settings   2. Cookie banner + analytics loader
-   3. Navigation 4. Reveal on scroll   5. Contact form (mailto)
-   ========================================================= */
-
-/* 1. SETTINGS -------------------------------------------------
-   Analytics stays OFF until one of these is filled in.
-   The cookie banner only appears once analytics is configured. */
-var ANALYTICS = {
-  ga4Id: "",            // e.g. "G-XXXXXXXXXX"
-  plausibleDomain: ""   // e.g. "arteze.co.uk"
-};
-var FORM_EMAIL = "hello@arteze.co.uk";
-
+/* Arteze site script: theme, menu, reveal, tabs, calculator, contact form (email), health check. */
 (function () {
   "use strict";
-  var doc = document;
-  var KEY = "arteze-cookie-consent";
-  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var doc = document, root = doc.documentElement;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
-  /* 2. COOKIES ------------------------------------------------ */
-  function getConsent() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
-  function setConsent(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
-  function loadAnalytics() {
-    if (ANALYTICS.ga4Id && !window.__gaLoaded) {
-      window.__gaLoaded = true;
-      var s = doc.createElement("script");
-      s.async = true;
-      s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(ANALYTICS.ga4Id);
-      doc.head.appendChild(s);
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function () { window.dataLayer.push(arguments); };
-      window.gtag("js", new Date());
-      window.gtag("config", ANALYTICS.ga4Id, { anonymize_ip: true });
-    }
-    if (ANALYTICS.plausibleDomain && !window.__plLoaded) {
-      window.__plLoaded = true;
-      var p = doc.createElement("script");
-      p.defer = true;
-      p.setAttribute("data-domain", ANALYTICS.plausibleDomain);
-      p.src = "https://plausible.io/js/script.js";
-      doc.head.appendChild(p);
-    }
-  }
-  function initCookies() {
-    var banner = doc.querySelector(".cookie-banner");
-    var consent = getConsent();
-    if (consent === "accepted") loadAnalytics();
-    if (!banner || (!ANALYTICS.ga4Id && !ANALYTICS.plausibleDomain)) return;
-    if (!consent) banner.classList.add("is-visible");
-    banner.addEventListener("click", function (e) {
-      var choice = e.target.getAttribute("data-consent");
-      if (!choice) return;
-      setConsent(choice);
-      banner.classList.remove("is-visible");
-      if (choice === "accepted") loadAnalytics();
-    });
-    doc.querySelectorAll("[data-cookie-settings]").forEach(function (el) {
-      el.addEventListener("click", function () { banner.classList.add("is-visible"); });
-    });
-  }
+  /* theme */
+  var tbtn = doc.querySelector("[data-theme-toggle]");
+  if (tbtn) tbtn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", next); store("arteze-theme", next);
+    tbtn.setAttribute("aria-label", next === "light" ? "Switch to dark theme" : "Switch to light theme");
+  });
 
-  /* 3. NAVIGATION -------------------------------------------- */
-  function initNav() {
-    var header = doc.querySelector(".site-header");
-    var toggle = doc.querySelector(".menu-toggle");
-    var mobile = doc.getElementById("mobile-nav");
-    if (toggle && mobile) {
-      var setOpen = function (open) {
-        toggle.setAttribute("aria-expanded", open ? "true" : "false");
-        mobile.classList.toggle("is-open", open);
-        doc.body.classList.toggle("menu-open", open);
-      };
-      toggle.addEventListener("click", function () { setOpen(toggle.getAttribute("aria-expanded") !== "true"); });
-      doc.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
-      mobile.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { setOpen(false); }); });
-    }
-    if (header) {
-      var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 8); };
-      onScroll();
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }
-  }
+  /* mobile menu */
+  var mbtn = doc.querySelector(".menu"), mnav = doc.getElementById("mnav");
+  if (mbtn && mnav) mbtn.addEventListener("click", function () {
+    var open = mnav.classList.toggle("open"); mbtn.setAttribute("aria-expanded", open ? "true" : "false");
+    doc.body.style.overflow = open ? "hidden" : "";
+  });
 
-  /* 4. REVEAL ------------------------------------------------- */
-  function initReveal() {
-    var items = doc.querySelectorAll(".reveal");
-    if (reduceMotion || !("IntersectionObserver" in window)) {
-      items.forEach(function (el) { el.classList.add("is-in"); });
-      return;
+  /* reveal */
+  var rv = doc.querySelectorAll(".rv");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+    rv.forEach(function (el) { io.observe(el); });
+  } else rv.forEach(function (el) { el.classList.add("in"); });
+
+  /* tabs */
+  doc.querySelectorAll("[data-tabs]").forEach(function (box) {
+    var btns = box.querySelectorAll("[role=tab]"), panels = box.querySelectorAll("[role=tabpanel]");
+    function show(i) {
+      btns.forEach(function (b, j) { b.setAttribute("aria-selected", i === j ? "true" : "false"); b.tabIndex = i === j ? 0 : -1; });
+      panels.forEach(function (p, j) { p.hidden = i !== j; });
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) { entry.target.classList.add("is-in"); io.unobserve(entry.target); }
+    btns.forEach(function (b, i) {
+      b.addEventListener("click", function () { show(i); });
+      b.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var n = (i + (e.key === "ArrowRight" ? 1 : btns.length - 1)) % btns.length; show(n); btns[n].focus(); }
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-    items.forEach(function (el) { io.observe(el); });
+    });
+    show(0);
+  });
+
+  /* calculator */
+  var range = doc.getElementById("spend");
+  if (range) {
+    var steps = [1, 2, 3, 5, 7.5, 10, 15, 20, 30, 50, 75, 100, 150, 200];
+    var fmt = function (m) { return m >= 1 ? "£" + (Math.round(m * 10) / 10) + "m" : "£" + Math.round(m * 1000) + "k"; };
+    var upd = function () {
+      var v = steps[+range.value];
+      doc.getElementById("spend-val").textContent = fmt(v);
+      doc.getElementById("save-val").textContent = fmt(v * 0.05) + " – " + fmt(v * 0.15);
+      range.setAttribute("aria-valuetext", fmt(v));
+    };
+    range.addEventListener("input", upd); upd();
   }
 
-  /* 5. CONTACT FORM ------------------------------------------
-     No server. Opens the visitor's email app with the details filled in. */
-  function initForm() {
-    var form = doc.getElementById("contact-form");
-    if (!form) return;
+  /* contact form: opens the visitor's email app with the details filled in */
+  var form = doc.getElementById("contact-form");
+  if (form) {
+    var q = new URLSearchParams(location.search), sel = form.elements.topic;
+    var map = { vmaas: "VMaaS (Vendor Management as a Service)", jap: "Joint Account Plan" };
+    var want = map[q.get("topic")] || q.get("topic");
+    if (want) for (var i = 0; i < sel.options.length; i++) if (sel.options[i].text === want) sel.selectedIndex = i;
+    if (q.get("message")) form.elements.message.value = q.get("message");
     form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var ok = true;
-      form.querySelectorAll("[required]").forEach(function (input) {
-        var field = input.closest(".field") || input.closest(".check");
-        var valid = input.type === "checkbox" ? input.checked : input.value.trim() !== "" && input.checkValidity();
-        if (field) field.classList.toggle("is-invalid", !valid);
-        if (!valid && ok) { input.focus(); ok = false; }
+      e.preventDefault(); var ok = true;
+      form.querySelectorAll("[required]").forEach(function (el) {
+        var f = el.closest(".field"), bad = !el.value.trim() || (el.type === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value));
+        f.classList.toggle("invalid", bad); if (bad && ok) { el.focus(); ok = false; }
       });
       if (!ok) return;
-      var v = function (name) { var el = form.elements[name]; return el ? el.value.trim() : ""; };
-      var body = [
-        "Name: " + v("name"),
-        "Email: " + v("email"),
-        "Organisation: " + v("company"),
-        "Role: " + v("role"),
-        "Topic: " + v("topic"),
-        "",
-        v("message")
-      ].join("\n");
-      var subject = "Call request: " + (v("company") || v("name"));
-      window.location.href = "mailto:" + FORM_EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-      var done = doc.getElementById("form-success");
-      if (done) { done.classList.add("is-visible"); form.hidden = true; done.focus(); }
+      var v = function (n) { return (form.elements[n].value || "").trim(); };
+      var body = "Name: " + v("first") + " " + v("last") + "\nCompany: " + v("company") + "\nEmail: " + v("email") + "\nPhone: " + v("phone") + "\nTopic: " + v("topic") + "\n\n" + v("message");
+      location.href = "mailto:hello@arteze.co.uk?subject=" + encodeURIComponent("Enquiry: " + v("topic")) + "&body=" + encodeURIComponent(body);
+      var done = doc.getElementById("form-done"); if (done) { done.classList.add("show"); done.focus(); }
     });
   }
 
-  function initMotion() {
-    if (!reduceMotion) return;
-    doc.querySelectorAll("svg.anim").forEach(function (svg) { if (svg.pauseAnimations) { svg.pauseAnimations(); svg.setCurrentTime && svg.setCurrentTime(parseFloat(svg.getAttribute("data-still") || "1.2")); } });
+  /* health check */
+  var hc = doc.getElementById("hc");
+  if (hc) {
+    var qs = JSON.parse(hc.getAttribute("data-q")), ans = [], idx = 0, busy = false;
+    var labels = ["Not at all", "Partly", "Mostly", "Fully"];
+    var qbox = doc.getElementById("hc-q"), rbox = doc.getElementById("hc-r"), bar = doc.getElementById("hc-bar"), cnt = doc.getElementById("hc-count");
+    var render = function () {
+      bar.style.width = (idx / qs.length * 100) + "%"; cnt.textContent = idx + "/" + qs.length;
+      qbox.querySelector(".qlabel").textContent = "Question " + (idx + 1) + " of " + qs.length + " · " + qs[idx][0];
+      qbox.querySelector(".qtext").textContent = qs[idx][1];
+      busy = false;
+    };
+    qbox.querySelectorAll(".answers button").forEach(function (b, val) {
+      b.addEventListener("click", function () {
+        if (busy) return; busy = true; ans[idx] = val; idx++;
+        if (idx < qs.length) { setTimeout(render, 120); } else { finish(); }
+      });
+    });
+    var finish = function () {
+      bar.style.width = "100%"; cnt.textContent = qs.length + "/" + qs.length;
+      var sum = ans.reduce(function (a, b) { return a + b; }, 0), score = Math.round(sum / (qs.length * 3) * 100);
+      var verdict = score >= 80 ? "Looks strong" : score >= 45 ? "Room to grow" : "Worth a closer look";
+      var text = {
+        "Looks strong": "Your answers suggest a relationship with good foundations. A confidential maturity assessment could confirm whether your client sees it the same way, and show where it could go further.",
+        "Room to grow": "Your answers suggest some solid ground, with a few areas where your view and your client's view may differ. These are often the areas worth understanding before the next renewal.",
+        "Worth a closer look": "Your answers suggest several areas where you may not have a clear view of how your client sees you. Hearing directly from your client, in confidence, is usually the best place to start."
+      }[verdict];
+      var weak = qs.filter(function (q, i) { return ans[i] <= 1; });
+      var list = doc.getElementById("hc-areas"); list.innerHTML = "";
+      if (weak.length) weak.forEach(function (q) { var li = doc.createElement("li"); li.innerHTML = "<strong></strong> "; li.firstChild.textContent = q[0] + ":"; li.appendChild(doc.createTextNode(q[1])); list.appendChild(li); });
+      else {
+        var p = doc.createElement("li");
+        p.textContent = score < 80 ? "None of your answers stood out as weak, but few were a confident 'Fully'. The gap between 'mostly' and 'fully' is often where a client's view differs most from yours."
+          : "You answered \"Mostly\" or \"Fully\" to every statement. The useful question now is whether your client would answer the same way.";
+        list.appendChild(p);
+      }
+      doc.getElementById("hc-score").innerHTML = score + "<small>/100</small>";
+      doc.getElementById("hc-verdict").textContent = verdict;
+      doc.getElementById("hc-text").textContent = text;
+      var msg = "I completed the Supplier Health Check. My indicative score was " + score + "/100 (" + verdict + "). I'd like to talk about a Joint Account Plan.";
+      doc.getElementById("hc-book").href = "contact.html?topic=jap&message=" + encodeURIComponent(msg);
+      qbox.hidden = true; rbox.hidden = false; rbox.focus();
+    };
+    doc.getElementById("hc-again").addEventListener("click", function () { ans = []; idx = 0; rbox.hidden = true; qbox.hidden = false; render(); });
+    render();
   }
 
-  doc.addEventListener("DOMContentLoaded", function () {
-    initMotion(); initCookies(); initNav(); initReveal(); initForm();
-    var y = doc.querySelector("[data-year]");
-    if (y) y.textContent = new Date().getFullYear();
-  });
+  var y = doc.querySelector("[data-year]"); if (y) y.textContent = new Date().getFullYear();
 })();

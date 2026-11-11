@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
 Sitemap: https://arteze.co.uk/sitemap.xml
