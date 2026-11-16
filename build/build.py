@@ -145,18 +145,18 @@ def page_hero(eb, h1, lead, extra="", crumb=None, art_key=None):
     c = f'<p class="crumb">{crumb}</p>' if crumb else ""
     if art_key:
         return f'''<section class="page-hero"><div class="wrap hero-grid"><div>{c}{eyebrow(eb)}<h1>{E(h1)}</h1><p class="lead">{E(lead)}</p>{extra}</div>
-<div class="hero-art"><img src="assets/art/{art_key}.svg" alt="" width="800" height="500"></div></div></section>'''
+<div class="hero-art"><img src="assets/photos/{art_key}.jpg" alt="" width="463" height="289"></div></div></section>'''
     return f'<section class="page-hero"><div class="wrap">{c}{eyebrow(eb)}<h1>{E(h1)}</h1><p class="lead">{E(lead)}</p>{extra}</div></section>'
 
 
 def svc_card(s, n=None, text=None):
     num = f'<span class="num">{n:02d}</span>' if n else ""
-    return f'''<a class="card pic rv" href="{s["file"]}"><div class="img"><img src="assets/art/{s["art"]}.svg" alt="" loading="lazy" width="800" height="500"></div>
+    return f'''<a class="card pic rv" href="{s["file"]}"><div class="img"><img src="assets/photos/{s["art"]}.jpg" alt="" loading="lazy" width="463" height="289"></div>
 <div class="body">{num}<h3>{E(s["title"])}</h3><p class="muted">{E(text or s["q"])}</p><span class="link arrow">Explore </span></div></a>'''
 
 
 def ind_card(i):
-    return f'''<a class="card pic rv" href="{i["file"]}"><div class="img"><img src="assets/art/{i["art"]}.svg" alt="" loading="lazy" width="800" height="500"></div>
+    return f'''<a class="card pic rv" href="{i["file"]}"><div class="img"><img src="assets/photos/{i["art"]}.jpg" alt="" loading="lazy" width="463" height="289"></div>
 <div class="body"><span class="tag">{E(i["tag"])}</span><h3>{E(i["title"])}</h3><p class="muted">{E(i["q"])}</p><span class="link arrow">Explore sector </span></div></a>'''
 
 
@@ -213,7 +213,7 @@ def home():
 <h1>We help clients get more from their suppliers, and help suppliers keep their clients.</h1>
 <p class="lead">Every supplier contract has two sides. We work with both: finance leaders who want every pound of supplier spend to earn its keep, and IT service providers who want to know how their clients really see them.</p>
 {btns("contact.html", "Book a free conversation", "services.html", "Explore our services")}</div>
-<div class="hero-art"><img src="assets/art/hero.svg" alt="Illustration of two linked contracts" width="800" height="500"></div></div>
+<div class="hero-art"><img src="assets/photos/hero.jpg" alt="A laptop with digital documents rising from the screen" width="463" height="289"></div></div>
 <div class="wrap g2" style="margin-top:56px">
 <a class="card rv" href="vmaas.html"><span class="tag">For clients · CFOs and finance directors</span><h3>Buying IT and outsourced services?</h3><p class="muted">We check, renegotiate and manage your supplier contracts, so you pay the right price for what you actually use, with a monthly ROI your finance team signs off.</p><span class="link arrow">Explore VMaaS </span></a>
 <a class="card rv" href="joint-account-plan.html"><span class="tag">For suppliers · IT service providers</span><h3>Providing IT services to clients?</h3><p class="muted">We find out how your clients really see you, then help you co-create a Joint Account Plan that protects renewals and grows the account.</p><span class="link arrow">Explore Joint Account Plan </span></a>
@@ -240,8 +240,8 @@ def home():
 <section class="sec"><div class="wrap"><div class="head rv">{eyebrow("Two flagship models")}<h2>Where is the money leaking from your P&amp;L, and who is plugging it?</h2>
 <p class="lead">For finance leaders, the value usually hides in unchecked invoices, late renewals and unclaimed credits. For IT service providers, it hides in what clients won't say out loud. We built a model for each.</p></div>
 <div class="g2">
-<a class="card pic rv" href="vmaas.html"><div class="img"><img src="assets/art/vmaas.svg" alt="" loading="lazy" width="800" height="500"></div><div class="body"><span class="tag">01 · For buyers of IT &amp; outsourced services</span><h3>VMaaS</h3><p><strong>{E(s1["q"])}</strong></p><p class="muted">{E(s1["desc"])}</p><span class="link arrow">Explore VMaaS </span></div></a>
-<a class="card pic rv" href="joint-account-plan.html"><div class="img"><img src="assets/art/joint-account-plan.svg" alt="" loading="lazy" width="800" height="500"></div><div class="body"><span class="tag">02 · For IT service providers</span><h3>Joint Account Plan</h3><p><strong>{E(s2["q"])}</strong></p><p class="muted">{E(s2["desc"])}</p><span class="link arrow">Explore Joint Account Plan </span></div></a>
+<a class="card pic rv" href="vmaas.html"><div class="img"><img src="assets/photos/vmaas.jpg" alt="" loading="lazy" width="463" height="289"></div><div class="body"><span class="tag">01 · For buyers of IT &amp; outsourced services</span><h3>VMaaS</h3><p><strong>{E(s1["q"])}</strong></p><p class="muted">{E(s1["desc"])}</p><span class="link arrow">Explore VMaaS </span></div></a>
+<a class="card pic rv" href="joint-account-plan.html"><div class="img"><img src="assets/photos/joint-account-plan.jpg" alt="" loading="lazy" width="463" height="289"></div><div class="body"><span class="tag">02 · For IT service providers</span><h3>Joint Account Plan</h3><p><strong>{E(s2["q"])}</strong></p><p class="muted">{E(s2["desc"])}</p><span class="link arrow">Explore Joint Account Plan </span></div></a>
 </div></div></section>
 {vmaas_areas()}
 {jap_phases()}
@@ -284,7 +284,7 @@ def about():
 
 
 def services():
-    fl = "".join(f'''<a class="card pic rv" href="{s["file"]}"><div class="img"><img src="assets/art/{s["art"]}.svg" alt="" loading="lazy" width="800" height="500"></div><div class="body"><span class="tag">{E(s["eyebrow"])}</span><h3>{E(s["title"])}</h3><p class="muted">{E(s["desc"])}</p><span class="link arrow">Explore {E(s["title"])} </span></div></a>''' for s in SERVICES[:2])
+    fl = "".join(f'''<a class="card pic rv" href="{s["file"]}"><div class="img"><img src="assets/photos/{s["art"]}.jpg" alt="" loading="lazy" width="463" height="289"></div><div class="body"><span class="tag">{E(s["eyebrow"])}</span><h3>{E(s["title"])}</h3><p class="muted">{E(s["desc"])}</p><span class="link arrow">Explore {E(s["title"])} </span></div></a>''' for s in SERVICES[:2])
     adv = "".join(svc_card(s, i + 1, s["q"] + " " + s["card"]) for i, s in enumerate(ADVISORY))
     body = page_hero("Our services", "Every contract has untapped value. Here's how we unlock it.",
                      "Two flagship models for continuous commercial control, backed by seven focused advisory services you can engage individually or combine.", btns()) + f'''
@@ -468,7 +468,6 @@ def misc():
 
 
 if __name__ == "__main__":
-    art.write_all(ROOT)
     home(); about(); services()
     for s in SERVICES: service_page(s)
     industries()
