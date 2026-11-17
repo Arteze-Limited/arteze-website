@@ -3,6 +3,7 @@ import html, json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from content import *  # noqa
 import art
+import md_articles
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SITE = "https://arteze.co.uk"
@@ -346,13 +347,15 @@ def insights_hero(cur):
 
 
 def insights():
+    global ARTICLES
+    ARTICLES = md_articles.load() + [a for a in ARTICLES if a["slug"] not in {m["slug"] for m in md_articles.load()}]
     cards = "".join(f'''<a class="card rv" href="{a["slug"]}.html"><span class="tag">{E(a["cat"])} · {a["mins"]} min read</span><h3>{E(a["title"])}</h3><p class="muted">{E(a["summary"])}</p><span class="link arrow">Read article </span></a>''' for a in ARTICLES)
     page("insights.html", "Insights", "Articles on supplier contracts, renewals, licensing and governance from Arteze.",
          insights_hero("insights.html") + f'<section class="sec deep"><div class="wrap g2">{cards}</div></section>{cta()}', "insights")
     for a in ARTICLES:
-        b = "".join(f"<h2>{E(t)}</h2>" if k == "h" else f"<p>{E(t)}</p>" for k, t in a["body"])
+        b = a["html"] if "html" in a else "".join(f"<h2>{E(t)}</h2>" if k == "h" else f"<p>{E(t)}</p>" for k, t in a["body"])
         body = page_hero(f'{a["cat"]} · {a["mins"]} min read', a["title"], a["summary"], crumb='<a href="insights.html">Insights</a> / Article') + \
-            f'<section class="sec deep"><div class="wrap prose rv">{b}</div></section>{cta("Want to know whether this applies to your contracts?")}'
+            f'<section class="sec deep"><div class="wrap prose rv">{b}</div></section>{cta(a.get("cta", "Want to know whether this applies to your contracts?"))}'
         page(a["slug"] + ".html", a["title"], a["summary"], body, "insights")
 
 

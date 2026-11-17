@@ -262,3 +262,11 @@ a.pic:hover .img img{transform:scale(1.04)}
   .card{padding:22px}
   .brand img{height:22px}
 }
+
+/* article body: lists, quotes and bold text inside .prose */
+.prose ul,.prose ol{color:var(--muted);font-size:1.06rem;padding-left:1.4em;margin:0 0 1.2em}
+.prose li{margin:0 0 .55em;padding-left:.2em}
+.prose li::marker{color:var(--cyan-text)}
+.prose strong{color:var(--text);font-weight:700}
+.prose blockquote{margin:0 0 1.4em;padding:18px 22px;border-left:3px solid var(--cyan);background:var(--card);border-radius:0 14px 14px 0}
+.prose blockquote p{margin:0;color:var(--text);font-size:1rem}

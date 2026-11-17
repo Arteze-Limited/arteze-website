@@ -54,3 +54,7 @@ Then list the provider and its cookies in `cookies.html`.
 
 ## Previewing locally
 Open the folder in a terminal and run `python3 -m http.server`, then visit http://localhost:8000. (Opening files directly from disk works, but some browsers block the shared icon file that way.)
+
+## Insight articles
+
+New articles are written as Markdown files in `build/articles/` (one file each, listed on the Insights page in file-name order). Each file starts with a short header: `slug`, `title`, `cat`, `mins`, `summary` and an optional `cta`. The text supports paragraphs, `###` subheadings, bullet and numbered lists, `>` quotes, `**bold**` and `[links](page.html)`. After adding or editing one, run `python3 build/build.py` from the site root and commit the generated `.html` files.
